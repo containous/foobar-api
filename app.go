@@ -2,13 +2,10 @@ package main
 
 import (
 	"bytes"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -32,9 +29,6 @@ const (
 )
 
 var (
-	cert string
-	key  string
-	ca   string
 	port string
 	name string
 )
@@ -75,25 +69,6 @@ func main() {
 		log.Fatal("You need to provide a certificate")
 	}
 	log.Fatal(server.ListenAndServeTLS("/cert/cert.pem", "/cert/key.pem"))
-}
-
-func setupMutualTLS(ca string) *tls.Config {
-	clientCACert, err := ioutil.ReadFile(ca)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	clientCertPool := x509.NewCertPool()
-	clientCertPool.AppendCertsFromPEM(clientCACert)
-
-	tlsConfig := &tls.Config{
-		ClientAuth:               tls.RequireAndVerifyClientCert,
-		ClientCAs:                clientCertPool,
-		PreferServerCipherSuites: true,
-		MinVersion:               tls.VersionTLS12,
-	}
-
-	return tlsConfig
 }
 
 func benchHandler(w http.ResponseWriter, _ *http.Request) {
